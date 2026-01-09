@@ -35,13 +35,13 @@
                         <span class="text-xl font-bold text-blue-600">{{ $producto->precio }} €</span>
 
                         <div class="flex gap-2">
-                            <!-- Botón Ver (Para todo el mundo) -->
-                            <button class="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-300">
-                                Ver
-                            </button>
+                           <!-- Añadir al Carrito -->
+                 <a href="{{ route('carrito.add', $producto->id) }}" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition">
+               <i class="fas fa-cart-plus"></i> Añadir
+                   </a>
 
                             <!-- BOTONES ADMIN (Amarillo y Rojo) -->
-                            <!-- Solo se ven si estás logueado y eres admin -->
+                        
                             @if(Auth::check() && Auth::user()->rol == 'admin')
                                 
                                 <!-- Editar -->

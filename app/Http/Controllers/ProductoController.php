@@ -12,54 +12,125 @@ class ProductoController extends Controller
 {
      public function index()
     {
-        // 1. Pedimos todos los productos a la base de datos
+       
         $productos = Producto::all(); 
         
-        // 2. Retornamos la vista y le pasamos los datos
+        
         return view('productos.index', ['productos' => $productos]);
     }
-    // Muestra el formulario
+    
     public function create()
     {
         if (auth()->user()->rol != 'admin') {
-    return redirect()->route('productos.index'); // O abort(403);
+    return redirect()->route('productos.index'); 
 }
 
-        // Necesitamos las categorías para el <select>
         $categorias = Categoria::all();
         return view('productos.create', compact('categorias'));
     }
 
-    // Guarda el producto en la BBDD
+   
     public function store(Request $request)
     
         {
-        // SEGURIDAD: Si no es admin, fuera
+        
         if (auth()->user()->rol != 'admin') {
             return redirect()->route('productos.index');
         }
-        // 1. VALIDACIÓN (Requisito de tu rúbrica)
-        // Esto comprueba los datos antes de hacer nada. Si falla, vuelve atrás automáticamente.
+      
         $validated = $request->validate([
             'nombre' => 'required|min:3|max:255',
             'descripcion' => 'required',
             'precio' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'categoria_id' => 'required|exists:categorias,id', // Debe existir en la tabla categorias
+            'categoria_id' => 'required|exists:categorias,id', 
         ]);
 
-        // 2. CREAR EL PRODUCTO
-        // Usamos asignación masiva (Mass Assignment)
         $producto = new Producto();
         $producto->nombre = $request->nombre;
         $producto->descripcion = $request->descripcion;
         $producto->precio = $request->precio;
         $producto->stock = $request->stock;
         $producto->categoria_id = $request->categoria_id;
-        // La imagen la dejamos pendiente para no complicar ahora mismo
         $producto->save();
 
-        // 3. REDIRECCIONAR
+    
         return redirect()->route('productos.index')->with('success', 'Producto creado correctamente');
+    }
+
+
+    //  Formulario de edicion
+    public function edit($id)
+    {
+        // SEGURIDAD
+        if (auth()->user()->rol != 'admin') {
+            return redirect()->route('productos.index');
+        }
+
+        $producto = Producto::find($id);
+        $categorias = Categoria::all(); 
+        
+        return view('productos.edit', compact('producto', 'categorias'));
+    }
+
+    // Actualizar en Base de Datos
+    public function update(Request $request, $id)
+    {
+        // SEGURIDAD
+        if (auth()->user()->rol != 'admin') {
+            return redirect()->route('productos.index');
+        }
+
+        // Validación
+        $request->validate([
+            'nombre' => 'required|min:3',
+            'descripcion' => 'required',
+            'precio' => 'required|numeric',
+            'stock' => 'required|integer',
+            'categoria_id' => 'required',
+        ]);
+
+        // Actualizar
+        $producto = Producto::find($id);
+        $producto->nombre = $request->nombre;
+        $producto->descripcion = $request->descripcion;
+        $producto->precio = $request->precio;
+        $producto->stock = $request->stock;
+        $producto->categoria_id = $request->categoria_id;
+        
+        $producto->save();
+
+        return redirect()->route('productos.index')->with('success', 'Producto actualizado');
+    }
+
+    //  Borrar Producto
+    public function destroy($id)
+    {
+        // Seguridad
+        if (auth()->user()->rol != 'admin') {
+            return redirect()->route('productos.index');
+        }
+
+        $producto = Producto::find($id);
+        $producto->delete();
+
+        return redirect()->route('productos.index')->with('success', 'Producto eliminado');
+    }
+    // Función para la página de inicio (Home)
+    public function welcome()
+    {
+        //Productos mas vendidos
+        $productos = Producto::inRandomOrder()->take(6)->get();
+        
+        return view('welcome', compact('productos'));
+    }
+    // Filtrar productos por categoría
+    public function mostrarPorCategoria(Categoria $categoria)
+    {
+        
+        $productos = $categoria->products; 
+        
+        
+        return view('productos.index', compact('productos'));
     }
 }

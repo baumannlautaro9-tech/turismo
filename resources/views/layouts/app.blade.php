@@ -8,12 +8,12 @@
     <!-- Scripts y Estilos (Vite) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- FontAwesome para iconos -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
-    <!-- MENÚ DE NAVEGACIÓN -->
+ 
     <nav class="bg-blue-800 text-white shadow-lg">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <!-- Logo -->
@@ -21,20 +21,48 @@
                 <i class="fas fa-running"></i> DAW Sports
             </a>
 
-            <!-- Parte Derecha: Enlaces y Usuario -->
+            <!-- Catalogo -->
             <div class="flex items-center gap-6">
                 <a href="{{ route('productos.index') }}" class="hover:text-blue-300 transition">Catálogo</a>
-                
-                <!-- Carrito (Simulado) -->
-                <a href="#" class="bg-blue-600 px-4 py-2 rounded-full hover:bg-blue-500 transition flex items-center gap-2">
-                    <i class="fas fa-shopping-cart"></i> 
-                    <span class="font-bold">0 €</span>
-                </a>
+                <div class="relative group">
+    <button class="flex items-center gap-1 hover:text-blue-300 transition focus:outline-none py-2">
+        Categorías <i class="fas fa-chevron-down text-xs"></i>
+    </button>
+    
+    <!-- Menú desplegable -->
+    <div class="absolute left-0 mt-0 w-48 bg-white text-gray-800 rounded shadow-xl hidden group-hover:block z-50">
+        @php
+            //  cargar categorías en el menú
+            $categoriasMenu = \App\Models\Categoria::all();
+        @endphp
 
-                <!-- ZONA DE LOGIN / USUARIO (Aquí estaba el error) -->
+        @foreach($categoriasMenu as $cat)
+            <!-- Enlace a cada categoría-->
+            <a href="{{ route('categorias.show', $cat->id) }}" class="block px-4 py-2 hover:bg-blue-100 transition border-b border-gray-100">
+                {{ $cat->nombre }}
+            </a>
+        @endforeach
+    </div>
+</div>
+               <!-- Carrito Dinámico -->
+@php
+    $totalCarrito = 0;
+    if(session('carrito')) {
+        foreach(session('carrito') as $id => $details) {
+            $totalCarrito += $details['precio'] * $details['cantidad'];
+        }
+    }
+@endphp
+
+<a href="{{ route('carrito.index') }}" class="bg-blue-600 px-4 py-2 rounded-full hover:bg-blue-500 transition flex items-center gap-2">
+    <i class="fas fa-shopping-cart"></i> 
+    <span class="font-bold">{{ $totalCarrito }} €</span>
+</a>
+
+                <!-- Login -->
                 <div class="border-l border-blue-600 pl-6 ml-2">
                     @auth
-                        <!-- SOLO SI ESTÁ LOGUEADO -->
+                        <!-- Si esta logueado -->
                         <span class="text-sm mr-2">Hola, {{ Auth::user()->name }}</span>
                         
                         <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -43,11 +71,18 @@
                                 Salir
                             </button>
                         </form>
-                    @else
-                        <!-- SI NO ESTÁ LOGUEADO -->
-                        <a href="{{ route('login') }}" class="text-sm hover:underline mr-4">Entrar</a>
-                        <a href="{{ route('register') }}" class="text-sm hover:underline">Registro</a>
-                    @endauth
+                   @else
+           <!-- Si no lo esta-->
+         <div class="flex items-center gap-4">
+          <a href="{{ route('login') }}" class="text-gray-200 hover:text-white transition">
+            Iniciar Sesión
+         </a>
+        
+          <a href="{{ route('register') }}" class="bg-white text-blue-800 px-4 py-2 rounded font-bold hover:bg-gray-200 transition">
+            Registrarse
+          </a>
+    </div>
+   @endauth
                 </div>
             </div>
         </div>

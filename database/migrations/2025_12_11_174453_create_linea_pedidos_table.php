@@ -11,18 +11,22 @@ return new class extends Migration
      */
 public function up(): void
 {
+  
     Schema::create('linea_pedidos', function (Blueprint $table) {
         $table->id();
         
-        // Relación con el pedido
-        $table->foreignId('order_id')->constrained('pedidos')->onDelete('cascade');
+        //  Relación con PEDIDOS 
+        $table->foreignId('pedido_id')
+              ->constrained('pedidos') 
+              ->onDelete('cascade');
         
-        // Relación con el producto
-        $table->foreignId('product_id')->constrained('productos');
-        
+        //  Relación con PRODUCTOS 
+        $table->foreignId('producto_id')
+              ->constrained('productos') 
+              ->onDelete('cascade');
+              
         $table->integer('cantidad');
-        $table->decimal('precio', 10, 2); // Guardamos el precio al momento de la compra por si cambia luego
-        
+        $table->decimal('precio', 10, 2);
         $table->timestamps();
     });
 }

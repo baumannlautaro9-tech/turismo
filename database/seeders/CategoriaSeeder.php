@@ -15,6 +15,7 @@ class CategoriaSeeder extends Seeder
             ['nombre' => 'Baloncesto', 'descripcion' => 'Canastas, balones y ropa NBA', 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'Running', 'descripcion' => 'Zapatillas y equipamiento para correr', 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'Tenis', 'descripcion' => 'Raquetas y accesorios', 'created_at' => now(), 'updated_at' => now()],
+            ['nombre' => 'Otros', 'descripcion' => 'Accesorios variados y nutrición', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }
