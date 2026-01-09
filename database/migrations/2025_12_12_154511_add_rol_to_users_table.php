@@ -9,7 +9,7 @@ return new class extends Migration
    public function up(): void
 {
     Schema::table('users', function (Blueprint $table) {
-        // Por defecto, todos serán 'cliente'
+        // Por defecto, todos seran clientes
         $table->string('rol')->default('cliente')->after('email');
     });
 }

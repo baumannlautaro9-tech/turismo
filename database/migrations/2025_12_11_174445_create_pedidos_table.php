@@ -13,12 +13,12 @@ public function up(): void
 {
     Schema::create('pedidos', function (Blueprint $table) {
         $table->id();
-        // Relación: Un pedido lo hace un usuario
+        
         $table->foreignId('user_id')->constrained('users');
         
         $table->decimal('total', 10, 2);
         $table->enum('estado', ['pendiente', 'pagado', 'enviado'])->default('pendiente');
-        $table->timestamps(); // La fecha del pedido es el 'created_at'
+        $table->timestamps(); 
     });
 }
 

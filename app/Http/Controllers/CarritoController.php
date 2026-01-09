@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Producto;
-use App\Models\Pedido;       // <--- CAMBIADO A ESPAÑOL
-use App\Models\LineaPedido;  // <--- CAMBIADO A ESPAÑOL
+use App\Models\Pedido;       
+use App\Models\LineaPedido;  
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -48,7 +48,6 @@ class CarritoController extends Controller
         return redirect()->back()->with('success', 'Producto eliminado');
     }
 
-    // CONFIRMAR PEDIDO (VERSIÓN ESPAÑOL)
     public function confirmar()
     {
         if(!Auth::check()) return redirect()->route('login');
@@ -63,14 +62,14 @@ class CarritoController extends Controller
 
         DB::transaction(function () use ($total, $carrito) {
             
-            // 1. Crear Pedido
+            //  Crear Pedido
             $pedido = Pedido::create([
                 'user_id' => Auth::id(),
                 'total' => $total,
                 'estado' => 'pagado',
             ]);
 
-            // 2. Crear Líneas
+            //  Crear Líneas
             foreach($carrito as $idProducto => $item) {
                 LineaPedido::create([
                     'pedido_id' => $pedido->id, 

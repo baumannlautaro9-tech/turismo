@@ -15,11 +15,11 @@ public function up(): void
         $table->id();
         $table->string('nombre');
         $table->text('descripcion');
-        $table->decimal('precio', 10, 2); // 10.50 €
+        $table->decimal('precio', 10, 2);
         $table->integer('stock');
-        $table->string('imagen')->nullable(); // Guardaremos la ruta del archivo
+        $table->string('imagen')->nullable(); 
         
-        // Relación: Un producto pertenece a una categoría
+        
         $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
         
         $table->timestamps();
