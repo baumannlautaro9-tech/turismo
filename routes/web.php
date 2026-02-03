@@ -1,37 +1,88 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContactoController;
+use App\Http\Controllers\EstablecimientoController;
+use App\Http\Controllers\FavoritoController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProductoController;
-use App\Http\Controllers\CarritoController;
 
-Route::get('/', [ProductoController::class, 'welcome'])->name('home');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Aquí es donde puedes registrar las rutas web para tu aplicación.
+| Estas rutas son cargadas por el RouteServiceProvider dentro de un grupo
+| que contiene el middleware "web".
+|
+*/
 
-Route::get('/dashboard', function () {
-    return redirect()->route('productos.index');
-})->name('dashboard');
+// ============================================================================
+// PÁGINA PRINCIPAL (Home)
+// ============================================================================
+Route::get('/', [EstablecimientoController::class, 'index'])->name('home');
 
-// Rutas publicas
-Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
-Route::get('/categorias/{categoria}', [ProductoController::class, 'mostrarPorCategoria'])->name('categorias.show');
-Route::get('/carrito', [CarritoController::class, 'index'])->name('carrito.index');
-Route::get('/carrito/agregar/{id}', [CarritoController::class, 'add'])->name('carrito.add');
-Route::get('/carrito/borrar/{id}', [CarritoController::class, 'delete'])->name('carrito.delete');
-// Rutas privadas
-Route::middleware(['auth'])->group(function () {
+// ============================================================================
+// AUTENTICACIÓN (Login, Register, Logout)
+// ============================================================================
 
-    // Comprar
-     Route::get('/carrito/confirmar', [CarritoController::class, 'confirmar'])->name('carrito.confirmar');
+// Mostrar formulario de login
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+
+// Procesar login
+Route::post('/login', [AuthController::class, 'login']);
+
+// Mostrar formulario de registro
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+
+// Procesar registro
+Route::post('/register', [AuthController::class, 'register']);
+
+// Cerrar sesión
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ============================================================================
+// ESTABLECIMIENTOS
+// ============================================================================
+
+// Ver detalle de un establecimiento
+Route::get('/establecimiento/{id}', [EstablecimientoController::class, 'show'])->name('establecimiento.show');
+
+// Buscar establecimientos (API para AJAX)
+Route::get('/api/establecimientos/buscar', [EstablecimientoController::class, 'buscar'])->name('establecimientos.buscar');
+
+// ============================================================================
+// FAVORITOS (Requieren autenticación)
+// ============================================================================
+
+Route::middleware('auth')->group(function () {
     
-    // Crear
-    Route::get('/productos/crear', [ProductoController::class, 'create'])->name('productos.create');
-    Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
+    // Ver mis favoritos
+    Route::get('/favoritos', [FavoritoController::class, 'index'])->name('favoritos.index');
     
-    // Editar 
-    Route::get('/productos/{producto}/editar', [ProductoController::class, 'edit'])->name('productos.edit');
-    Route::put('/productos/{producto}', [ProductoController::class, 'update'])->name('productos.update');
+    // Toggle favorito (añadir/quitar)
+    Route::post('/favoritos/toggle/{establecimiento}', [FavoritoController::class, 'toggle'])->name('favoritos.toggle');
     
-    // Borrar 
-    Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])->name('productos.destroy');
+    // Añadir a favoritos
+    Route::post('/favoritos/{establecimiento}', [FavoritoController::class, 'store'])->name('favoritos.store');
+    
+    // Eliminar de favoritos
+    Route::delete('/favoritos/{establecimiento}', [FavoritoController::class, 'destroy'])->name('favoritos.destroy');
 });
 
-require __DIR__.'/auth.php';;
+// ============================================================================
+// CONTACTO
+// ============================================================================
+
+// Mostrar formulario de contacto
+Route::get('/contacto', [ContactoController::class, 'index'])->name('contacto');
+
+// Enviar mensaje de contacto
+Route::post('/contacto', [ContactoController::class, 'enviar'])->name('contacto.enviar');
+
+// ============================================================================
+// RUTAS ADICIONALES (Opcional - Para desarrollo)
+// ============================================================================
+
+// Redirigir /home a la página principal
+Route::redirect('/home', '/');

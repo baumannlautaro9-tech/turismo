@@ -5,10 +5,13 @@ namespace App\Console\Commands;
 use App\Models\Establecimiento;
 use App\Services\TurismoApiService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class ImportarEstablecimientos extends Command
 {
-    protected $signature = 'turismo:importar {--force : Forzar actualización}';
+    protected $signature = 'turismo:importar 
+                            {--limit= : Limitar cantidad de registros}';
+    
     protected $description = 'Importar establecimientos desde la API de Castilla y León';
 
     public function handle(TurismoApiService $apiService): int
@@ -16,79 +19,127 @@ class ImportarEstablecimientos extends Command
         $this->info('🚀 Importando establecimientos turísticos...');
         $this->newLine();
 
-        // Obtener datos de la API
-        $forceRefresh = $this->option('force');
-        
-        if ($forceRefresh) {
-            $this->warn('Forzando actualización (ignorando caché)...');
-        }
+        // Aumentar límites
+        ini_set('memory_limit', '512M');
+        set_time_limit(600); // 10 minutos
 
-        $this->info('📡 Descargando datos desde la API...');
-        $establecimientos = $apiService->obtenerEstablecimientos($forceRefresh);
+        $limit = $this->option('limit');
 
-        if (empty($establecimientos)) {
-            $this->error('❌ No se pudieron obtener datos de la API');
-            return Command::FAILURE;
-        }
-
-        $this->info("✅ Obtenidos " . count($establecimientos) . " registros");
+        $this->info('📡 Descargando y procesando datos desde la API...');
+        $this->info('⏳ Esto puede tardar varios minutos...');
         $this->newLine();
-
-        // Importar con barra de progreso
-        $bar = $this->output->createProgressBar(count($establecimientos));
-        $bar->setFormat(' %current%/%max% [%bar%] %percent:3s%%');
-        $bar->start();
 
         $importados = 0;
         $actualizados = 0;
         $errores = 0;
+        $procesados = 0;
+
+        // Obtener el generador
+        $establecimientos = $apiService->obtenerEstablecimientos();
+
+        // Procesar por lotes
+        $lote = [];
+        $tamañoLote = 100;
 
         foreach ($establecimientos as $establecimientoData) {
-            try {
-                $datosTransformados = $apiService->transformarEstablecimiento($establecimientoData);
-
-                if (empty($datosTransformados['n_registro'])) {
-                    $errores++;
-                    $bar->advance();
-                    continue;
-                }
-
-                $establecimiento = Establecimiento::updateOrCreate(
-                    ['n_registro' => $datosTransformados['n_registro']],
-                    $datosTransformados
-                );
-
-                if ($establecimiento->wasRecentlyCreated) {
-                    $importados++;
-                } else {
-                    $actualizados++;
-                }
-
-            } catch (\Exception $e) {
-                $errores++;
+            // Si hay límite y ya lo alcanzamos, salir
+            if ($limit && $procesados >= (int)$limit) {
+                break;
             }
 
-            $bar->advance();
+            $lote[] = $establecimientoData;
+            $procesados++;
+
+            // Cuando el lote esté lleno, procesarlo
+            if (count($lote) >= $tamañoLote) {
+                $resultado = $this->procesarLote($lote, $apiService);
+                $importados += $resultado['importados'];
+                $actualizados += $resultado['actualizados'];
+                $errores += $resultado['errores'];
+                
+                $this->info("✓ Procesados: {$procesados} | Importados: {$importados} | Actualizados: {$actualizados} | Errores: {$errores}");
+                
+                // Limpiar lote
+                $lote = [];
+                
+                // Liberar memoria
+                gc_collect_cycles();
+            }
         }
 
-        $bar->finish();
+        // Procesar últimos registros si quedan
+        if (!empty($lote)) {
+            $resultado = $this->procesarLote($lote, $apiService);
+            $importados += $resultado['importados'];
+            $actualizados += $resultado['actualizados'];
+            $errores += $resultado['errores'];
+        }
+
         $this->newLine(2);
 
         // Resumen
-        $this->info('📊 RESUMEN:');
+        $this->info('📊 RESUMEN DE LA IMPORTACIÓN:');
         $this->table(
             ['Estado', 'Cantidad'],
             [
-                ['✅ Nuevos', $importados],
+                ['✅ Nuevos importados', $importados],
                 ['🔄 Actualizados', $actualizados],
                 ['❌ Errores', $errores],
-                ['📦 Total', count($establecimientos)],
+                ['📦 Total procesados', $procesados],
             ]
         );
 
         $this->newLine();
-        $this->info('✨ Importación completada!');
+        $this->info('✨ Importación completada exitosamente!');
 
         return Command::SUCCESS;
+    }
+
+    private function procesarLote(array $lote, TurismoApiService $apiService): array
+    {
+        $importados = 0;
+        $actualizados = 0;
+        $errores = 0;
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($lote as $establecimientoData) {
+                try {
+                    $datosTransformados = $apiService->transformarEstablecimiento($establecimientoData);
+
+                    if (empty($datosTransformados['n_registro'])) {
+                        $errores++;
+                        continue;
+                    }
+
+                    $establecimiento = Establecimiento::updateOrCreate(
+                        ['n_registro' => $datosTransformados['n_registro']],
+                        $datosTransformados
+                    );
+
+                    if ($establecimiento->wasRecentlyCreated) {
+                        $importados++;
+                    } else {
+                        $actualizados++;
+                    }
+
+                } catch (\Exception $e) {
+                    $errores++;
+                }
+            }
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->error("Error en lote: " . $e->getMessage());
+        }
+
+        return [
+            'importados' => $importados,
+            'actualizados' => $actualizados,
+            'errores' => $errores
+        ];
     }
 }
