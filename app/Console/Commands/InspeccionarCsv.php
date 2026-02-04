@@ -30,7 +30,7 @@ class InspeccionarCsv extends Command
             $tmpFile = storage_path('app/turismo_inspeccion.csv');
             file_put_contents($tmpFile, $response->body());
 
-            $this->info('✅ CSV descargado');
+            $this->info(' CSV descargado');
             $this->newLine();
 
             // Abrir y leer
@@ -39,7 +39,7 @@ class InspeccionarCsv extends Command
             // Leer encabezados
             $headers = fgetcsv($handle, 0, ',');
             
-            $this->info('📋 ENCABEZADOS DEL CSV:');
+            $this->info(' ENCABEZADOS DEL CSV:');
             $this->newLine();
             
             foreach ($headers as $index => $header) {
@@ -47,7 +47,7 @@ class InspeccionarCsv extends Command
             }
 
             $this->newLine();
-            $this->info('📦 PRIMERA FILA DE DATOS:');
+            $this->info(' PRIMERA FILA DE DATOS:');
             $this->newLine();
 
             // Leer primera fila de datos
@@ -65,7 +65,7 @@ class InspeccionarCsv extends Command
             }
 
             $this->newLine();
-            $this->info('📦 SEGUNDA FILA DE DATOS:');
+            $this->info('SEGUNDA FILA DE DATOS:');
             $this->newLine();
 
             // Leer segunda fila
@@ -85,7 +85,7 @@ class InspeccionarCsv extends Command
             unlink($tmpFile);
 
             $this->newLine();
-            $this->info('✅ Inspección completada');
+            $this->info('Inspección completada');
 
             return Command::SUCCESS;
 

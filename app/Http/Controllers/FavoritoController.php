@@ -9,18 +9,16 @@ use Illuminate\Support\Facades\Auth;
 class FavoritoController extends Controller
 {
     /**
-     * Constructor - Requiere autenticación
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    /**
      * Mostrar favoritos del usuario
      */
     public function index()
     {
+        // Verificar autenticación manualmente
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión para ver tus favoritos.');
+        }
+
         $favoritos = Auth::user()->favoritos()
             ->orderBy('nombre', 'asc')
             ->paginate(15);
@@ -33,6 +31,18 @@ class FavoritoController extends Controller
      */
     public function toggle($establecimientoId)
     {
+        // Verificar autenticación
+        if (!Auth::check()) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Debes iniciar sesión'
+                ], 401);
+            }
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión para añadir favoritos.');
+        }
+
         $establecimiento = Establecimiento::findOrFail($establecimientoId);
         
         $esFavorito = Auth::user()->toggleFavorito($establecimientoId);
@@ -58,6 +68,12 @@ class FavoritoController extends Controller
      */
     public function store($establecimientoId)
     {
+        // Verificar autenticación
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión para añadir favoritos.');
+        }
+
         $establecimiento = Establecimiento::findOrFail($establecimientoId);
         
         Auth::user()->addFavorito($establecimientoId);
@@ -70,6 +86,12 @@ class FavoritoController extends Controller
      */
     public function destroy($establecimientoId)
     {
+        // Verificar autenticación
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                ->with('error', 'Debes iniciar sesión.');
+        }
+
         Auth::user()->removeFavorito($establecimientoId);
 
         return back()->with('success', 'Eliminado de favoritos correctamente.');

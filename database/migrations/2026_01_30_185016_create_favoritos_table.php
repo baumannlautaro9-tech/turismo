@@ -21,8 +21,8 @@ return new class extends Migration
             // Clave primaria compuesta
             $table->primary(['user_id', 'establecimiento_id']);
             
-            // Timestamp para saber cuándo se añadió a favoritos
-            $table->timestamp('created_at')->useCurrent();
+          
+            
         });
     }
 

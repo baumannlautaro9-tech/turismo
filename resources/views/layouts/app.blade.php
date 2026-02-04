@@ -25,7 +25,7 @@
     </script>
     
     <style>
-        /* Estilos adicionales si los necesitas */
+        /* Estilos adicionales*/
         body {
             font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
