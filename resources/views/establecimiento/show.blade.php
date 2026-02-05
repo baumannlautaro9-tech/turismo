@@ -177,7 +177,7 @@
                 </div>
             @endif
             
-            <!-- Mapa (si tiene coordenadas) -->
+            <!-- Mapa  -->
             @if($establecimiento->tiene_coordenadas)
                 <div class="border-t pt-8 mt-8">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Ubicación en el mapa</h2>

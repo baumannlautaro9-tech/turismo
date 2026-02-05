@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Turismo Castilla y León')</title>
     
-    <!-- Tailwind CSS CDN -->
+    <!-- Enlace CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Configuración naranja personalizado-->
@@ -35,45 +35,48 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
     
-    <!-- HEADER -->
-    <header class="bg-gradient-to-r from-naranja-primary to-naranja-light shadow-md">
-        <nav class="container mx-auto px-4 py-2">
-            <!-- Navegación superior derecha -->
-            <div class="flex justify-end mb-2">
-                <div class="flex items-center space-x-6">
-                    @auth
-                        <a href="{{ route('favoritos.index') }}" class="text-white hover:text-gray-100 transition font-medium text-sm">
-                            Mis Favoritos
-                        </a>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-white text-sm">{{ Auth::user()->name }}</span>
-                            <form action="{{ route('logout') }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" class="bg-white text-naranja-primary px-4 py-2 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
-                                    Cerrar Sesión
-                                </button>
-                            </form>
-                        </div>
-                    @else
-                        <a href="{{ route('login') }}" class="text-white hover:text-gray-100 transition font-medium text-sm">
-                            Iniciar Sesión
-                        </a>
-                        <a href="{{ route('register') }}" class="bg-white text-naranja-primary px-4 py-2 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
-                            Registrarse
-                        </a>
-                    @endauth
-                </div>
-            </div>
+  <!-- HEADER -->
+<header class="bg-gradient-to-r from-naranja-primary to-naranja-light shadow-md">
+    <nav class="container mx-auto px-4 py-1">
+        <!-- Contenedor grid para 3 columnas -->
+        <div class="grid grid-cols-3 items-center">
+            <!-- Columna izquierda (vacía para balance) -->
+            <div></div>
             
-            <!-- Logo centrado (más pequeño) -->
-            <div class="text-center py-2">
+            <!-- Logo  -->
+            <div class="flex justify-center py-1">
                 <a href="{{ route('home') }}" class="inline-block">
-                    <img src="{{ asset('images/logo.png') }}" alt="Turismo Castilla y León" class="h-16 w-auto mx-auto">
+                    <img src="{{ asset('images/logo.png') }}" alt="Turismo Castilla y León" class="h-40 w-auto">
                 </a>
             </div>
-        </nav>
-    </header>
-    
+            
+            <!-- Navegación a la derecha -->
+            <div class="flex items-center justify-end space-x-6">
+                @auth
+                    <a href="{{ route('favoritos.index') }}" class="text-white hover:text-gray-100 transition font-medium text-sm">
+                        Mis Favoritos
+                    </a>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-white text-sm">{{ Auth::user()->name }}</span>
+                        <form action="{{ route('logout') }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="bg-white text-naranja-primary px-4 py-2 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
+                                Cerrar Sesión
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="text-white hover:text-gray-100 transition font-medium text-sm">
+                        Iniciar Sesión
+                    </a>
+                    <a href="{{ route('register') }}" class="bg-white text-naranja-primary px-4 py-2 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
+                        Registrarse
+                    </a>
+                @endauth
+            </div>
+        </div>
+    </nav>
+</header>
     <!-- CONTENIDO PRINCIPAL -->
     <main class="flex-grow container mx-auto px-4 py-8">
         @if(session('success'))

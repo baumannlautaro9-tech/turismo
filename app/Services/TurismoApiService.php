@@ -5,6 +5,7 @@ namespace App\Services;
 use Generator;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class TurismoApiService
 {
@@ -23,9 +24,24 @@ class TurismoApiService
         'Zamora',
     ];
 
-    /* =========================
-       LECTURA CSV
-    ========================= */
+   /* Lectura con cache */
+    public function obtenerEstablecimientosCacheados(bool $force = false): array
+{
+    if ($force) {
+        Cache::forget('turismo_establecimientos');
+    }
+
+    return Cache::remember('turismo_establecimientos', now()->addDay(), function () {
+        $resultados = [];
+        foreach ($this->obtenerEstablecimientos() as $data) {
+            $resultados[] = $this->transformarEstablecimiento($data);
+        }
+        return $resultados;
+    });
+}
+
+     
+    /* LECTURA CSV*/
     public function obtenerEstablecimientos(): Generator
     {
         $tmpFile = storage_path('app/turismo_temp.csv');
@@ -70,9 +86,7 @@ class TurismoApiService
         unlink($tmpFile);
     }
 
-    /* =========================
-       TRANSFORMACIÓN
-    ========================= */
+    /* Funcion para transformar los datos */
     public function transformarEstablecimiento(array $data): array
     {
         return [

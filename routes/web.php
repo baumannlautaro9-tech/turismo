@@ -6,25 +6,15 @@ use App\Http\Controllers\EstablecimientoController;
 use App\Http\Controllers\FavoritoController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Aquí es donde puedes registrar las rutas web para tu aplicación.
-| Estas rutas son cargadas por el RouteServiceProvider dentro de un grupo
-| que contiene el middleware "web".
-|
-*/
 
-// ============================================================================
+
 // PÁGINA PRINCIPAL (Home)
-// ============================================================================
+
 Route::get('/', [EstablecimientoController::class, 'index'])->name('home');
 
-// ============================================================================
+
 // AUTENTICACIÓN (Login, Register, Logout)
-// ============================================================================
+
 
 // Mostrar formulario de login
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -41,19 +31,15 @@ Route::post('/register', [AuthController::class, 'register']);
 // Cerrar sesión
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// ============================================================================
 // ESTABLECIMIENTOS
-// ============================================================================
-
 // Ver detalle de un establecimiento
 Route::get('/establecimiento/{id}', [EstablecimientoController::class, 'show'])->name('establecimiento.show');
 
 // Buscar establecimientos (API para AJAX)
 Route::get('/api/establecimientos/buscar', [EstablecimientoController::class, 'buscar'])->name('establecimientos.buscar');
 
-// ============================================================================
-// FAVORITOS (Requieren autenticación)
-// ============================================================================
+
+// FAVORITOS 
 
 Route::middleware('auth')->group(function () {
     
@@ -70,9 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/favoritos/{establecimiento}', [FavoritoController::class, 'destroy'])->name('favoritos.destroy');
 });
 
-// ============================================================================
 // CONTACTO
-// ============================================================================
 
 // Mostrar formulario de contacto
 Route::get('/contacto', [ContactoController::class, 'index'])->name('contacto');
@@ -80,9 +64,7 @@ Route::get('/contacto', [ContactoController::class, 'index'])->name('contacto');
 // Enviar mensaje de contacto
 Route::post('/contacto', [ContactoController::class, 'enviar'])->name('contacto.enviar');
 
-// ============================================================================
-// RUTAS ADICIONALES (Opcional - Para desarrollo)
-// ============================================================================
+
 
 // Redirigir /home a la página principal
 Route::redirect('/home', '/');

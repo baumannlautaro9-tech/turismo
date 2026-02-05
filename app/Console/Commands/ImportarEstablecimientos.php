@@ -9,21 +9,22 @@ use Illuminate\Console\Command;
 class ImportarEstablecimientos extends Command
 {
     protected $signature = 'turismo:importar {--limit=}';
-    protected $description = 'Importar establecimientos turísticos';
+    protected $description = 'Importar establecimientos turísticos y actualizar cache';
 
     public function handle(TurismoApiService $apiService): int
     {
-        $this->info('🚀 Importando establecimientos...');
+        $this->info('Importando establecimientos...');
+
+        // ✅ Usamos el método cacheado del servicio
+        $establecimientos = $apiService->obtenerEstablecimientosCacheados();
 
         $limit = $this->option('limit');
         $procesados = $importados = $actualizados = $errores = 0;
 
-        foreach ($apiService->obtenerEstablecimientos() as $data) {
+        foreach ($establecimientos as $datos) {
             if ($limit && $procesados >= (int) $limit) break;
 
             try {
-                $datos = $apiService->transformarEstablecimiento($data);
-
                 if (!$datos['n_registro']) {
                     $errores++;
                     continue;
@@ -53,6 +54,7 @@ class ImportarEstablecimientos extends Command
             ]
         );
 
+        $this->info('Caché de turismo actualizada y datos importados.');
         return Command::SUCCESS;
     }
 }
